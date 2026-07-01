@@ -117,31 +117,31 @@ pub fn log(level: Level, msg: &str, file: &str, line: u32) {
 }
 
 #[macro_export]
-macro_rules! log_trace {
+macro_rules! logx_trace {
     ($($arg:tt)*) => {
         $crate::log($crate::Level::Trace, &format!($($arg)*), file!(), line!());
     };
 }
 #[macro_export]
-macro_rules! log_info {
+macro_rules! logx_info {
     ($($arg:tt)*) => {
         $crate::log($crate::Level::Info, &format!($($arg)*), file!(), line!());
     };
 }
 #[macro_export]
-macro_rules! log_warn {
+macro_rules! logx_warn {
     ($($arg:tt)*) => {
         $crate::log($crate::Level::Warn, &format!($($arg)*), file!(), line!());
     };
 }
 #[macro_export]
-macro_rules! log_error {
+macro_rules! logx_error {
     ($($arg:tt)*) => {
         $crate::log($crate::Level::Error, &format!($($arg)*), file!(), line!());
     };
 }
 #[macro_export]
-macro_rules! log_fatal {
+macro_rules! logx_fatal {
     ($($arg:tt)*) => {
         $crate::log($crate::Level::Fatal, &format!($($arg)*), file!(), line!());
     };

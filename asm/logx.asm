@@ -7,7 +7,7 @@
 ; x86-64 Linux — single-file include for NASM.
 ;
 ; Usage:
-;   %include "buggedd.asm"
+;   %include "logx.asm"
 ;
 ;   log_init            ; call once at program start
 ;   log_trace "msg"
@@ -19,10 +19,10 @@
 ;
 ; To log to a file instead of terminal, define LOG_FILE_PATH:
 ;   %define LOG_FILE_PATH "/tmp/app.log"
-;   %include "buggedd.asm"
+;   %include "logx.asm"
 
-%ifndef BUGGEDD_ASM
-%define BUGGEDD_ASM
+%ifndef LOGX_ASM
+%define LOGX_ASM
 
 section .data
 log_fd:    dq 0        ; 0 = terminal, otherwise file descriptor

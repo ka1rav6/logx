@@ -1,240 +1,234 @@
-# Buggedd
+<p align="center">
+  <img src="https://img.shields.io/badge/languages-10-blue?style=flat-square" alt="10 languages">
+  <img src="https://img.shields.io/badge/dependencies-zero-brightgreen?style=flat-square" alt="Zero deps">
+  <img src="https://img.shields.io/badge/license-BSD 2--Clause-yellow?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/setup-copy/paste-red?style=flat-square" alt="Copy paste">
+</p>
 
-Single-file loggers in 9 languages — same API philosophy everywhere.
+<h1 align="center">🐞 LogX</h1>
 
-- **Single file** — drop it in your project, `#include` / `import` / `require`, and start logging
-- **5 levels** — `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` (FATAL exits)
-- **Timestamps** — `[HH:MM:SS.mmm]` on every line
-- **File & line** — automatically captured
-- **Colors** — auto-detected by terminal; override with `LOG_COLOR=0` / `LOG_COLOR=1`
-- **Level filtering** — `LOG_LEVEL=WARN ./app` silences everything below WARN
-- **File logging** — optional; call `setLogFile("/path/to/log")` or similar
-- **Thread safe** — mutex-guarded output where applicable
-
----
-
-## Menu
-
-| Language   | File                                      |
-|------------|-------------------------------------------|
-| [C++](#cpp)     | `cpp/Buggedd.h`                  |
-| [C](#c)         | `c/buggedd.h`                    |
-| [Python](#py)   | `python/buggedd.py`     |
-| [Java](#java)     | `java/Buggedd.java`          |
-| [JavaScript (Node)](#js) | `js/buggedd.js` |
-| [TypeScript](#ts) | `ts/buggedd.ts`       |
-| [Rust](#rust)      | `rust/buggedd.rs`            |
-| [Go](#go)         | `go/buggedd.go`                |
-| [Zig](#zig)       | `zig/buggedd.zig`            |
-| [x86-64 Assembly](#asm) | `asm/buggedd.asm` |
+<p align="center">
+  <strong>One file. Ten languages. Zero dependencies.</strong><br>
+  <em>Copy. Paste. Log.</em>
+</p>
 
 ---
 
-<a name="cpp"></a>
-## C++  (`cpp/Buggedd.h`)
+## What if logging were this easy?
 
-```cpp
-#include "Buggedd.h"
+```python
+from logx import info, warn, error
 
-int main() {
-    BUGGED_INFO << "hello " << 42;
-    BUGGED_ERROR << "something broke";
-}
-```
-
-```
-g++ -std=c++11 main.cpp -o app
-```
-
-```cpp
-// Optional: log to file
-Buggedd::setLogFile("/tmp/app.log");   // redirect all output to file
-Buggedd::setLogFile();                 // close file, go back to terminal
-```
-
----
-
-<a name="c"></a>
-## C  (`c/buggedd.h`)
-
-```c
-#include "buggedd.h"
-
-int main() {
-    BUGGED_INFO("hello %d", 42);
-    BUGGED_ERROR("something broke");
-}
+info("Server started on port %d", 8080)
+warn("Memory at %.1f%%", 74.2)
+error("Connection lost")
 ```
 
 ```c
+LOGX_INFO("Server started on port %d", 8080);
+LOGX_WARN("Memory at %.1f%%", 74.2);
+LOGX_ERROR("Connection lost");
+```
+
+```rust
+logx_info!("Server started on port {}", 8080);
+logx_warn!("Memory at {:.1}%", 74.2);
+logx_error!("Connection lost");
+```
+
+That's it. No installs. No config files. No `npm install` hunting down 200 transitive deps.
+
+---
+
+## Why LogX?
+
+Logging should be as easy as `print()`. But `print()` doesn't give you levels, timestamps, colors, or file output.
+
+Most logging libraries give you all that — and also give you a headache. Setup, configuration, dependencies, framework lock-in...
+
+LogX is the opposite. One file per language. Same API philosophy everywhere. Drop it in, include it, done.
+
+### Why not just `print()`?
+
+| Feature | `print()` | LogX |
+|---------|-----------|------|
+| Log levels | ❌ | ✅ TRACE, INFO, WARN, ERROR, FATAL |
+| Timestamps | ❌ | ✅ `[HH:MM:SS.mmm]` |
+| File & line | ❌ | ✅ Automatic |
+| Colored output | ❌ | ✅ Auto TTY detection |
+| File logging | ❌ | ✅ Optional, one call |
+| Thread safe | ❌ | ✅ Mutex-guarded |
+| Level filtering | ❌ | ✅ `LOG_LEVEL=WARN ./app` |
+| Still one file | ✅ | ✅ |
+
+---
+
+## Quick Start
+
+| Language | File | Include |
+|----------|------|---------|
+| Python | `python/logx.py` | `from logx import info` |
+| JavaScript | `js/logx.js` | `const { info } = require('./logx')` |
+| TypeScript | `ts/logx.ts` | `import { info } from './logx'` |
+| C | `c/logx.h` | `#include "logx.h"` → `LOGX_INFO(...)` |
+| C++ | `cpp/logx.h` | `#include "logx.h"` → `LOGX_INFO << ...` |
+| Rust | `rust/logx.rs` | `#[macro_use] mod logx;` → `logx_info!(...)` |
+| Go | `go/logx.go` | `import "yourmodule/logx"` → `logx.Info(...)` |
+| Java | `java/logx.java` | `import Logx;` → `Logx.info(...)` |
+| Zig | `zig/logx.zig` | `@import("logx.zig")` → `logx.log(.info, ...)` |
+| Assembly | `asm/logx.asm` | `%include "logx.asm"` → `log_info "..."` |
+
+---
+
+### Python
+
+```python
+from logx import trace, info, warn, error, fatal, set_log_file
+
+info("hello %d", 42)
+error("something broke")
+
+set_log_file("/tmp/app.log")  # redirect to file
+```
+
+### JavaScript (Node)
+
+```javascript
+const { trace, info, warn, error, fatal, setLogFile } = require('./logx');
+
+info('hello %d', 42);
+error('something broke');
+```
+
+### TypeScript
+
+```typescript
+import { trace, info, warn, error, fatal, setLogFile } from './logx';
+
+info('hello %d', 42);
+error('something broke');
+```
+
+### C
+
+```c
+#include "logx.h"
+
+int main() {
+    LOGX_INFO("hello %d", 42);
+    LOGX_ERROR("something broke");
+}
+```
+
+```c
 // Optional: log to file
-bd_set_log_file("/tmp/app.log");
+lx_set_log_file("/tmp/app.log");
 ```
 
 ```
 gcc -std=c11 main.c -o app -lpthread
 ```
 
----
+### C++
 
-<a name="py"></a>
-## Python  (`python/buggedd.py`)
+```cpp
+#include "logx.h"
 
-```python
-from buggedd import trace, info, warn, error, fatal, set_log_file
+int main() {
+    LOGX_INFO << "hello " << 42;
+    LOGX_ERROR << "something broke";
+}
+```
 
-info("hello %d", 42)
-error("something broke")
-
-# Optional: log to file
-set_log_file("/tmp/app.log")
+```cpp
+// Optional: log to file
+Logx::setLogFile("/tmp/app.log");
+Logx::setLogFile();  // back to terminal
 ```
 
 ```
-python3 main.py
+g++ -std=c++11 main.cpp -o app
 ```
 
----
+### Rust
 
-<a name="java"></a>
-## Java  (`java/Buggedd.java` — single class, no deps)
+```rust
+#[macro_use] mod logx;
+
+fn main() {
+    logx_info!("hello {}", 42);
+    logx_error!("something broke");
+}
+```
+
+```rust
+// Optional: log to file
+logx::set_log_file("/tmp/app.log");
+```
+
+```
+[dependencies]
+libc = "0.2"
+```
+
+### Go
+
+```go
+package main
+
+import "yourmodule/logx"
+
+func main() {
+    logx.Info("hello %d", 42)
+    logx.Error("something broke")
+}
+```
+
+```go
+// Optional: log to file
+logx.SetLogFile("/tmp/app.log")
+```
+
+### Java
 
 ```java
 public class Main {
     public static void main(String[] args) {
-        Buggedd.info("hello %d", 42);
-        Buggedd.error("something broke");
+        Logx.info("hello %d", 42);
+        Logx.error("something broke");
     }
 }
 ```
 
 ```java
 // Optional: log to file
-Buggedd.setLogFile("/tmp/app.log");
+Logx.setLogFile("/tmp/app.log");
 ```
 
 ```
-javac Buggedd.java Main.java && java Main
+javac Logx.java Main.java && java Main
 ```
 
----
-
-<a name="js"></a>
-## JavaScript (Node)  (`js/buggedd.js`)
-
-```javascript
-const { trace, info, warn, error, fatal, setLogFile } = require('./buggedd');
-
-info('hello %d', 42);
-error('something broke');
-
-// Optional: log to file
-setLogFile('/tmp/app.log');
-```
-
-```
-node main.js
-```
-
----
-
-<a name="ts"></a>
-## TypeScript  (`ts/buggedd.ts`)
-
-```typescript
-import { trace, info, warn, error, fatal, setLogFile } from './buggedd';
-
-info('hello %d', 42);
-error('something broke');
-
-// Optional: log to file
-setLogFile('/tmp/app.log');
-```
-
-```
-npx tsx main.ts
-```
-
----
-
-<a name="rust"></a>
-## Rust  (`rust/buggedd.rs`)
-
-```rust
-#[macro_use] mod buggedd;
-
-fn main() {
-    log_info!("hello {}", 42);
-    log_error!("something broke");
-}
-```
-
-```rust
-// Optional: log to file
-buggedd::set_log_file("/tmp/app.log");
-```
-
-Requires `libc` crate for terminal detection. Add to `Cargo.toml`:
-```toml
-[dependencies]
-libc = "0.2"
-```
-
----
-
-<a name="go"></a>
-## Go  (`go/buggedd.go`)
-
-```go
-package main
-
-import "yourmodule/buggedd"
-
-func main() {
-    buggedd.Info("hello %d", 42)
-    buggedd.Error("something broke")
-}
-```
-
-```go
-// Optional: log to file
-buggedd.SetLogFile("/tmp/app.log")
-```
-
-```
-go run main.go
-```
-
----
-
-<a name="zig"></a>
-## Zig  (`zig/buggedd.zig`)
+### Zig
 
 ```zig
-const buggedd = @import("buggedd.zig");
+const logx = @import("logx.zig");
 
 pub fn main() void {
-    buggedd.log(.info, "hello 42", @src());
-    buggedd.log(.error, "something broke", @src());
+    logx.log(.info, "hello 42", @src());
+    logx.log(.error, "something broke", @src());
 }
 ```
 
 ```zig
 // Optional: log to file
-try buggedd.setLogFile("/tmp/app.log");
+try logx.setLogFile("/tmp/app.log");
 ```
 
-```
-zig build-exe main.zig buggedd.zig
-```
-
----
-
-<a name="asm"></a>
-## x86-64 Assembly (Linux, NASM)  (`asm/buggedd.asm`)
+### x86-64 Assembly (Linux, NASM)
 
 ```asm
-%include "buggedd.asm"
+%include "logx.asm"
 
 section .data
 log_str(msg_hello, "hello 42")
@@ -247,6 +241,7 @@ _start:
     log_info msg_hello
     log_error msg_error
     call log_close
+
     mov rax, 60
     xor rdi, rdi
     syscall
@@ -255,7 +250,7 @@ _start:
 ```asm
 ; Optional: log to file (define before including)
 %define LOG_FILE_PATH "/tmp/app.log"
-%include "buggedd.asm"
+%include "logx.asm"
 ```
 
 ```
@@ -264,19 +259,32 @@ nasm -felf64 main.asm -o main.o && ld main.o -o main
 
 ---
 
-## Environment variables
+## Environment Variables
 
-| Variable     | Values                          | Default                                 |
-|--------------|---------------------------------|-----------------------------------------|
-| `LOG_LEVEL`  | `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` | `TRACE`                       |
-| `LOG_COLOR`  | `0`, `1`, `yes`                 | auto (enabled if both stdout/stderr are TTYs) |
+| Variable | Values | Default |
+|----------|--------|---------|
+| `LOG_LEVEL` | `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` | `TRACE` |
+| `LOG_COLOR` | `0`, `1`, `yes` | Auto (enabled if both stdout/stderr are TTYs) |
 
-## Output format
+## Output Format
 
 ```
 [HH:MM:SS.mmm][LEVEL] filename:line -> message
 ```
 
+## Philosophy
+
+LogX is not trying to replace OpenTelemetry. It is built for:
+
+- Prototypes & hackathons
+- CLI tools & scripts
+- Game jams
+- Students learning a new language
+- Small-to-medium projects
+- Anyone who just wants to log without ceremony
+
+> *"If you can write print(), you already know how to use LogX."*
+
 ## License
 
-BSD 2-Clause.  See `LICENSE`.
+BSD 2-Clause. See `LICENSE`.

@@ -10,7 +10,7 @@ import java.io.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-public class Buggedd {
+public class Logx {
 
     public static final int TRACE = 0;
     public static final int INFO  = 1;
