@@ -1,129 +1,248 @@
 # Logger
 
-A minimal, single-header C++11 logger with stream syntax, level filtering, timestamps, colors, and thread safety.
+Single-file loggers in 9 languages — same API philosophy everywhere.
 
-## Quick start
+- **Single file** — drop it in your project, `#include` / `import` / `require`, and start logging
+- **5 levels** — `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` (FATAL exits)
+- **Timestamps** — `[HH:MM:SS.mmm]` on every line
+- **File & line** — automatically captured
+- **Colors** — auto-detected by terminal; override with `LOG_COLOR=0` / `LOG_COLOR=1`
+- **Level filtering** — `LOG_LEVEL=WARN ./app` silences everything below WARN
+- **File logging** — optional; call `setLogFile("/path/to/log")` or similar
+- **Thread safe** — mutex-guarded output where applicable
 
-Drop `Logger.h` into your project, `#include` it, and start logging.
+---
+
+## C++  (`cpp/Logger.h`)
 
 ```cpp
 #include "Logger.h"
 
 int main() {
-    LOG_TRACE << "starting up";
-    LOG_INFO  << "user " << username << " logged in";
-    LOG_WARN  << "disk at " << pct << "%";
-    LOG_ERROR << "failed to open " << path;
-    // LOG_FATAL << "crashing";  // calls std::terminate()
+    LOG_INFO << "hello " << 42;
+    LOG_ERROR << "something broke";
 }
 ```
-
-Compile with any C++11 compiler — no extra source files to link:
 
 ```
 g++ -std=c++11 main.cpp -o app
 ```
 
-## Example program
+---
 
-```cpp
-#include "Logger.h"
-#include <cmath>
+## C  (`c/logger.h`)
 
-double divide(double a, double b) {
-    LOG_TRACE << "divide(" << a << ", " << b << ") called";
-    if (b == 0.0) {
-        LOG_ERROR << "division by zero, returning NaN";
-        return NAN;
-    }
-    double result = a / b;
-    LOG_INFO << a << " / " << b << " = " << result;
-    return result;
-}
+```c
+#include "logger.h"
 
 int main() {
-    LOG_INFO << "Calculator app started";
-
-    for (int i = 5; i >= 0; --i) {
-        divide(10.0, static_cast<double>(i));
-    }
-
-    LOG_WARN << "that was some risky math";
-    LOG_INFO << "app shutting down";
+    LOG_INFO("hello %d", 42);
+    LOG_ERROR("something broke");
 }
 ```
 
-Running it:
-
-```
-$ g++ -std=c++11 example.cpp -o example
-$ ./example
-[14:12:06.092][INFO ] example.cpp:16 -> Calculator app started
-[14:12:06.092][TRACE] example.cpp:9 -> divide(10, 5) called
-[14:12:06.092][INFO ] example.cpp:14 -> 10 / 5 = 2
-[14:12:06.092][TRACE] example.cpp:9 -> divide(10, 4) called
-[14:12:06.092][INFO ] example.cpp:14 -> 10 / 4 = 2.5
-...
-[14:12:06.092][ERROR] example.cpp:11 -> division by zero, returning NaN
-[14:12:06.092][WARN ] example.cpp:24 -> that was some risky math
-[14:12:06.092][INFO ] example.cpp:25 -> app shutting down
-
-$ LOG_LEVEL=WARN ./example
-[14:12:06.092][ERROR] example.cpp:11 -> division by zero, returning NaN
-[14:12:06.092][WARN ] example.cpp:24 -> that was some risky math
+```c
+// Optional: log to file
+cl_set_log_file("/tmp/app.log");
 ```
 
-## Log levels
-
-| Macro       | Level | Output |
-|-------------|-------|--------|
-| `LOG_TRACE` | 0     | stdout |
-| `LOG_INFO`  | 1     | stdout |
-| `LOG_WARN`  | 2     | stdout |
-| `LOG_ERROR` | 3     | stderr |
-| `LOG_FATAL` | 4     | stderr + terminate |
-
-## Runtime level filtering
-
-Set `LOG_LEVEL` to `TRACE`, `INFO`, `WARN`, `ERROR`, or `FATAL`.
-Messages below the threshold are silently discarded (the stream arguments are **not** evaluated).
-
 ```
-LOG_LEVEL=WARN ./myapp
+gcc -std=c11 main.c -o app -lpthread
 ```
 
-## Colors
+---
 
-Colors are enabled automatically when both `stdout` and `stderr` are terminals.
-Override with the `LOG_COLOR` environment variable:
+## Python  (`python/logger.py`)
+
+```python
+from logger import trace, info, warn, error, fatal, set_log_file
+
+info("hello %d", 42)
+error("something broke")
+
+# Optional: log to file
+set_log_file("/tmp/app.log")
+```
 
 ```
-LOG_COLOR=0 ./myapp    # disable
-LOG_COLOR=1 ./myapp    # force enable
+python3 main.py
 ```
 
-| Level | Color   |
-|-------|---------|
-| TRACE | Cyan    |
-| INFO  | Green   |
-| WARN  | Yellow  |
-| ERROR | Red     |
-| FATAL | Magenta |
+---
+
+## Java  (`java/Logger.java` — single class, no deps)
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Logger.info("hello %d", 42);
+        Logger.error("something broke");
+    }
+}
+```
+
+```java
+// Optional: log to file
+Logger.setLogFile("/tmp/app.log");
+```
+
+```
+javac Logger.java Main.java && java Main
+```
+
+---
+
+## JavaScript (Node)  (`js/logger.js`)
+
+```javascript
+const { trace, info, warn, error, fatal, setLogFile } = require('./logger');
+
+info('hello %d', 42);
+error('something broke');
+
+// Optional: log to file
+setLogFile('/tmp/app.log');
+```
+
+```
+node main.js
+```
+
+---
+
+## TypeScript  (`ts/logger.ts`)
+
+```typescript
+import { trace, info, warn, error, fatal, setLogFile } from './logger';
+
+info('hello %d', 42);
+error('something broke');
+
+// Optional: log to file
+setLogFile('/tmp/app.log');
+```
+
+```
+npx tsx main.ts
+```
+
+---
+
+## Rust  (`rust/logger.rs`)
+
+```rust
+#[macro_use] mod logger;
+
+fn main() {
+    log_info!("hello {}", 42);
+    log_error!("something broke");
+}
+```
+
+```rust
+// Optional: log to file
+logger::set_log_file("/tmp/app.log");
+```
+
+Requires `libc` crate for terminal detection. Add to `Cargo.toml`:
+```toml
+[dependencies]
+libc = "0.2"
+```
+
+---
+
+## Go  (`go/logger.go`)
+
+```go
+package main
+
+import "yourmodule/logger"
+
+func main() {
+    logger.Info("hello %d", 42)
+    logger.Error("something broke")
+}
+```
+
+```go
+// Optional: log to file
+logger.SetLogFile("/tmp/app.log")
+```
+
+```
+go run main.go
+```
+
+---
+
+## Zig  (`zig/logger.zig`)
+
+```zig
+const logger = @import("logger.zig");
+
+pub fn main() void {
+    logger.log(.info, "hello 42", @src());
+    logger.log(.error, "something broke", @src());
+}
+```
+
+```zig
+// Optional: log to file
+try logger.setLogFile("/tmp/app.log");
+```
+
+```
+zig build-exe main.zig logger.zig
+```
+
+---
+
+## x86-64 Assembly (Linux, NASM)  (`asm/logger.asm`)
+
+```asm
+%include "logger.asm"
+
+section .data
+log_str(msg_hello, "hello 42")
+log_str(msg_error, "something broke")
+
+section .text
+global _start
+_start:
+    call log_init
+    log_info msg_hello
+    log_error msg_error
+    call log_close
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+```
+
+```asm
+; Optional: log to file (define before including)
+%define LOG_FILE_PATH "/tmp/app.log"
+%include "logger.asm"
+```
+
+```
+nasm -felf64 main.asm -o main.o && ld main.o -o main
+```
+
+---
+
+## Environment variables
+
+| Variable     | Values                          | Default                                 |
+|--------------|---------------------------------|-----------------------------------------|
+| `LOG_LEVEL`  | `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` | `TRACE`                       |
+| `LOG_COLOR`  | `0`, `1`, `yes`                 | auto (enabled if both stdout/stderr are TTYs) |
 
 ## Output format
 
 ```
 [HH:MM:SS.mmm][LEVEL] filename:line -> message
 ```
-
-## Thread safety
-
-All output lines are serialized with a mutex.  The mutex is locked once, at flush time (the `LogStream` destructor), not per-`<<` call.
-
-## Requirements
-
-- C++11 or later
-- POSIX (`unistd.h`, `localtime_r`) — easily adaptable to Windows
 
 ## License
 
