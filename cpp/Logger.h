@@ -10,6 +10,7 @@ of this software, in source or binary form.  That's the only requirement.
 #define LOGGER_H
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <mutex>
@@ -54,6 +55,14 @@ public:
         return c;
     }
 
+    static void setLogFile(const std::string& path) {
+        logStream().open(path, std::ios::app);
+    }
+
+    static void setLogFile() {
+        logStream().close();
+    }
+
     class LogStream {
     public:
         LogStream(LogLevel level, const char* file, int line)
@@ -68,18 +77,24 @@ public:
             if (!m_active) return;
             static std::mutex mtx;
             std::lock_guard<std::mutex> lock(mtx);
-            std::ostream& out = (m_level >= LogLevel::ERROR) ? std::cerr : std::cout;
 
-            if (colored()) out << levelColor(m_level);
-
-            out << "[" << timestamp() << "]"
-                << "[" << levelString(m_level) << "]"
-                << " " << m_file << ":" << m_line
-                << " -> " << m_buf.str();
-
-            if (colored()) out << "\033[0m";
-
-            out << std::endl;
+            auto& fs = logStream();
+            if (fs.is_open()) {
+                fs << "[" << timestamp() << "]"
+                   << "[" << levelString(m_level) << "]"
+                   << " " << m_file << ":" << m_line
+                   << " -> " << m_buf.str()
+                   << std::endl;
+            } else {
+                std::ostream& out = (m_level >= LogLevel::ERROR) ? std::cerr : std::cout;
+                if (colored()) out << levelColor(m_level);
+                out << "[" << timestamp() << "]"
+                    << "[" << levelString(m_level) << "]"
+                    << " " << m_file << ":" << m_line
+                    << " -> " << m_buf.str();
+                if (colored()) out << "\033[0m";
+                out << std::endl;
+            }
 
             if (m_level == LogLevel::FATAL)
                 std::terminate();
@@ -145,6 +160,11 @@ public:
             return ss.str();
         }
     };
+
+    static std::ofstream& logStream() {
+        static std::ofstream fs;
+        return fs;
+    }
 
 private:
     Logger() = delete;
