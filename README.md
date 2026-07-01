@@ -13,6 +13,23 @@ Single-file loggers in 9 languages — same API philosophy everywhere.
 
 ---
 
+## Menu
+
+| Language   | File                                      |
+|------------|-------------------------------------------|
+| [C++](#c-cpploggerh)     | `cpp/Logger.h`                  |
+| [C](#c-cloggerh)         | `c/logger.h`                    |
+| [Python](#python-pythonloggerpy)   | `python/logger.py`     |
+| [Java](#java-javaloggerjava)     | `java/Logger.java`          |
+| [JavaScript (Node)](#javascript-node-jsloggerjs) | `js/logger.js` |
+| [TypeScript](#typescript-tsloggerts) | `ts/logger.ts`       |
+| [Rust](#rust-rustloggerrs)      | `rust/logger.rs`            |
+| [Go](#go-gologgergo)         | `go/logger.go`                |
+| [Zig](#zig-zigloggerzig)       | `zig/logger.zig`            |
+| [x86-64 Assembly](#x86-64-assembly-linux-nasm-asmloggerasm) | `asm/logger.asm` |
+
+---
+
 ## C++  (`cpp/Logger.h`)
 
 ```cpp
