@@ -66,7 +66,8 @@ public:
 
         ~LogStream() {
             if (!m_active) return;
-            std::lock_guard<std::mutex> lock(m_mutex);
+            static std::mutex mtx;
+            std::lock_guard<std::mutex> lock(mtx);
             std::ostream& out = (m_level >= LogLevel::ERROR) ? std::cerr : std::cout;
 
             if (colored()) out << levelColor(m_level);
@@ -101,7 +102,6 @@ public:
         const char* m_file = nullptr;
         int m_line = 0;
         bool m_active = false;
-        static std::mutex m_mutex;
 
         void stripPath(const char* path) {
             const char* slash = strrchr(path, '/');
