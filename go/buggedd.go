@@ -6,7 +6,7 @@ except that the above copyright notice must be retained in all copies
 of this software, in source or binary form.  That's the only requirement.
 */
 
-package logger
+package buggedd
 
 import (
 	"fmt"

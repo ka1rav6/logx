@@ -6,8 +6,8 @@ except that the above copyright notice must be retained in all copies
 of this software, in source or binary form.  That's the only requirement.
 */
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef BUGGEDD_H
+#define BUGGEDD_H
 
 #include <iostream>
 #include <fstream>
@@ -29,7 +29,7 @@ enum class LogLevel {
     FATAL = 4,
 };
 
-class Logger {
+class Buggedd {
 public:
     static LogLevel& minLevel() {
         static LogLevel level = []{
@@ -67,7 +67,7 @@ public:
     public:
         LogStream(LogLevel level, const char* file, int line)
             : m_level(level) {
-            if (level < Logger::minLevel()) return;
+            if (level < Buggedd::minLevel()) return;
             m_active = true;
             stripPath(file);
             m_line = line;
@@ -167,13 +167,13 @@ public:
     }
 
 private:
-    Logger() = delete;
+    Buggedd() = delete;
 };
 
-#define LOG_TRACE Logger::LogStream(LogLevel::TRACE, __FILE__, __LINE__)
-#define LOG_INFO  Logger::LogStream(LogLevel::INFO,  __FILE__, __LINE__)
-#define LOG_WARN  Logger::LogStream(LogLevel::WARN,  __FILE__, __LINE__)
-#define LOG_ERROR Logger::LogStream(LogLevel::ERROR, __FILE__, __LINE__)
-#define LOG_FATAL Logger::LogStream(LogLevel::FATAL, __FILE__, __LINE__)
+#define BUGGED_TRACE Buggedd::LogStream(LogLevel::TRACE, __FILE__, __LINE__)
+#define BUGGED_INFO  Buggedd::LogStream(LogLevel::INFO,  __FILE__, __LINE__)
+#define BUGGED_WARN  Buggedd::LogStream(LogLevel::WARN,  __FILE__, __LINE__)
+#define BUGGED_ERROR Buggedd::LogStream(LogLevel::ERROR, __FILE__, __LINE__)
+#define BUGGED_FATAL Buggedd::LogStream(LogLevel::FATAL, __FILE__, __LINE__)
 
 #endif

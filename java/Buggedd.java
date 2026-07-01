@@ -9,10 +9,8 @@ of this software, in source or binary form.  That's the only requirement.
 import java.io.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
-public class Logger {
+public class Buggedd {
 
     public static final int TRACE = 0;
     public static final int INFO  = 1;

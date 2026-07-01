@@ -1,4 +1,4 @@
-# Logger
+# Buggedd
 
 Single-file loggers in 9 languages — same API philosophy everywhere.
 
@@ -17,28 +17,28 @@ Single-file loggers in 9 languages — same API philosophy everywhere.
 
 | Language   | File                                      |
 |------------|-------------------------------------------|
-| [C++](#cpp)     | `cpp/Logger.h`                  |
-| [C](#c)         | `c/logger.h`                    |
-| [Python](#py)   | `python/logger.py`     |
-| [Java](#java)     | `java/Logger.java`          |
-| [JavaScript (Node)](#js) | `js/logger.js` |
-| [TypeScript](#ts) | `ts/logger.ts`       |
-| [Rust](#rust)      | `rust/logger.rs`            |
-| [Go](#go)         | `go/logger.go`                |
-| [Zig](#zig)       | `zig/logger.zig`            |
-| [x86-64 Assembly](#asm) | `asm/logger.asm` |
+| [C++](#cpp)     | `cpp/Buggedd.h`                  |
+| [C](#c)         | `c/buggedd.h`                    |
+| [Python](#py)   | `python/buggedd.py`     |
+| [Java](#java)     | `java/Buggedd.java`          |
+| [JavaScript (Node)](#js) | `js/buggedd.js` |
+| [TypeScript](#ts) | `ts/buggedd.ts`       |
+| [Rust](#rust)      | `rust/buggedd.rs`            |
+| [Go](#go)         | `go/buggedd.go`                |
+| [Zig](#zig)       | `zig/buggedd.zig`            |
+| [x86-64 Assembly](#asm) | `asm/buggedd.asm` |
 
 ---
 
 <a name="cpp"></a>
-## C++  (`cpp/Logger.h`)
+## C++  (`cpp/Buggedd.h`)
 
 ```cpp
-#include "Logger.h"
+#include "Buggedd.h"
 
 int main() {
-    LOG_INFO << "hello " << 42;
-    LOG_ERROR << "something broke";
+    BUGGED_INFO << "hello " << 42;
+    BUGGED_ERROR << "something broke";
 }
 ```
 
@@ -48,27 +48,27 @@ g++ -std=c++11 main.cpp -o app
 
 ```cpp
 // Optional: log to file
-Logger::setLogFile("/tmp/app.log");   // redirect all output to file
-Logger::setLogFile();                 // close file, go back to terminal
+Buggedd::setLogFile("/tmp/app.log");   // redirect all output to file
+Buggedd::setLogFile();                 // close file, go back to terminal
 ```
 
 ---
 
 <a name="c"></a>
-## C  (`c/logger.h`)
+## C  (`c/buggedd.h`)
 
 ```c
-#include "logger.h"
+#include "buggedd.h"
 
 int main() {
-    LOG_INFO("hello %d", 42);
-    LOG_ERROR("something broke");
+    BUGGED_INFO("hello %d", 42);
+    BUGGED_ERROR("something broke");
 }
 ```
 
 ```c
 // Optional: log to file
-cl_set_log_file("/tmp/app.log");
+bd_set_log_file("/tmp/app.log");
 ```
 
 ```
@@ -78,10 +78,10 @@ gcc -std=c11 main.c -o app -lpthread
 ---
 
 <a name="py"></a>
-## Python  (`python/logger.py`)
+## Python  (`python/buggedd.py`)
 
 ```python
-from logger import trace, info, warn, error, fatal, set_log_file
+from buggedd import trace, info, warn, error, fatal, set_log_file
 
 info("hello %d", 42)
 error("something broke")
@@ -97,33 +97,33 @@ python3 main.py
 ---
 
 <a name="java"></a>
-## Java  (`java/Logger.java` — single class, no deps)
+## Java  (`java/Buggedd.java` — single class, no deps)
 
 ```java
 public class Main {
     public static void main(String[] args) {
-        Logger.info("hello %d", 42);
-        Logger.error("something broke");
+        Buggedd.info("hello %d", 42);
+        Buggedd.error("something broke");
     }
 }
 ```
 
 ```java
 // Optional: log to file
-Logger.setLogFile("/tmp/app.log");
+Buggedd.setLogFile("/tmp/app.log");
 ```
 
 ```
-javac Logger.java Main.java && java Main
+javac Buggedd.java Main.java && java Main
 ```
 
 ---
 
 <a name="js"></a>
-## JavaScript (Node)  (`js/logger.js`)
+## JavaScript (Node)  (`js/buggedd.js`)
 
 ```javascript
-const { trace, info, warn, error, fatal, setLogFile } = require('./logger');
+const { trace, info, warn, error, fatal, setLogFile } = require('./buggedd');
 
 info('hello %d', 42);
 error('something broke');
@@ -139,10 +139,10 @@ node main.js
 ---
 
 <a name="ts"></a>
-## TypeScript  (`ts/logger.ts`)
+## TypeScript  (`ts/buggedd.ts`)
 
 ```typescript
-import { trace, info, warn, error, fatal, setLogFile } from './logger';
+import { trace, info, warn, error, fatal, setLogFile } from './buggedd';
 
 info('hello %d', 42);
 error('something broke');
@@ -158,10 +158,10 @@ npx tsx main.ts
 ---
 
 <a name="rust"></a>
-## Rust  (`rust/logger.rs`)
+## Rust  (`rust/buggedd.rs`)
 
 ```rust
-#[macro_use] mod logger;
+#[macro_use] mod buggedd;
 
 fn main() {
     log_info!("hello {}", 42);
@@ -171,7 +171,7 @@ fn main() {
 
 ```rust
 // Optional: log to file
-logger::set_log_file("/tmp/app.log");
+buggedd::set_log_file("/tmp/app.log");
 ```
 
 Requires `libc` crate for terminal detection. Add to `Cargo.toml`:
@@ -183,22 +183,22 @@ libc = "0.2"
 ---
 
 <a name="go"></a>
-## Go  (`go/logger.go`)
+## Go  (`go/buggedd.go`)
 
 ```go
 package main
 
-import "yourmodule/logger"
+import "yourmodule/buggedd"
 
 func main() {
-    logger.Info("hello %d", 42)
-    logger.Error("something broke")
+    buggedd.Info("hello %d", 42)
+    buggedd.Error("something broke")
 }
 ```
 
 ```go
 // Optional: log to file
-logger.SetLogFile("/tmp/app.log")
+buggedd.SetLogFile("/tmp/app.log")
 ```
 
 ```
@@ -208,33 +208,33 @@ go run main.go
 ---
 
 <a name="zig"></a>
-## Zig  (`zig/logger.zig`)
+## Zig  (`zig/buggedd.zig`)
 
 ```zig
-const logger = @import("logger.zig");
+const buggedd = @import("buggedd.zig");
 
 pub fn main() void {
-    logger.log(.info, "hello 42", @src());
-    logger.log(.error, "something broke", @src());
+    buggedd.log(.info, "hello 42", @src());
+    buggedd.log(.error, "something broke", @src());
 }
 ```
 
 ```zig
 // Optional: log to file
-try logger.setLogFile("/tmp/app.log");
+try buggedd.setLogFile("/tmp/app.log");
 ```
 
 ```
-zig build-exe main.zig logger.zig
+zig build-exe main.zig buggedd.zig
 ```
 
 ---
 
 <a name="asm"></a>
-## x86-64 Assembly (Linux, NASM)  (`asm/logger.asm`)
+## x86-64 Assembly (Linux, NASM)  (`asm/buggedd.asm`)
 
 ```asm
-%include "logger.asm"
+%include "buggedd.asm"
 
 section .data
 log_str(msg_hello, "hello 42")
@@ -255,7 +255,7 @@ _start:
 ```asm
 ; Optional: log to file (define before including)
 %define LOG_FILE_PATH "/tmp/app.log"
-%include "logger.asm"
+%include "buggedd.asm"
 ```
 
 ```
