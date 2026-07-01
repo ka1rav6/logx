@@ -1,0 +1,16 @@
+{
+  "name": "logx",
+  "version": "1.0.0",
+  "description": "Single-file logger for JavaScript — zero dependencies, copy-paste ready",
+  "main": "logx.js",
+  "license": "BSD-2-Clause",
+  "keywords": ["log", "logger", "logging", "zero-dependency", "single-file"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ka1rav6/logx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ka1rav6/logx/issues"
+  },
+  "homepage": "https://github.com/ka1rav6/logx"
+}

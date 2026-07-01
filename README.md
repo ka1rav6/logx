@@ -36,7 +36,18 @@ logx_warn!("Memory at {:.1}%", 74.2);
 logx_error!("Connection lost");
 ```
 
-That's it. No installs. No config files. No `npm install` hunting down 200 transitive deps.
+```js
+const { info } = require('logx');
+info("Server started on port %d", 8080);
+```
+
+No installs. No config files. No hunting down 200 transitive deps.
+
+Or just:
+
+```bash
+npm install logx
+```
 
 ---
 
@@ -95,19 +106,27 @@ error("something broke")
 set_log_file("/tmp/app.log")  # redirect to file
 ```
 
-### JavaScript (Node)
+### JavaScript (Node) — [npm package](js/)
+
+```bash
+npm install logx
+```
 
 ```javascript
-const { trace, info, warn, error, fatal, setLogFile } = require('./logx');
+const { trace, info, warn, error, fatal, setLogFile } = require('logx');
 
 info('hello %d', 42);
 error('something broke');
 ```
 
-### TypeScript
+### TypeScript — [npm package](ts/)
+
+```bash
+npm install logx
+```
 
 ```typescript
-import { trace, info, warn, error, fatal, setLogFile } from './logx';
+import { trace, info, warn, error, fatal, setLogFile } from 'logx';
 
 info('hello %d', 42);
 error('something broke');

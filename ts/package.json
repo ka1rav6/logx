@@ -1,0 +1,27 @@
+{
+  "name": "logx",
+  "version": "1.0.0",
+  "description": "Single-file logger for TypeScript — zero dependencies, copy-paste ready",
+  "main": "logx.js",
+  "types": "logx.d.ts",
+  "license": "BSD-2-Clause",
+  "keywords": [
+    "log",
+    "logger",
+    "logging",
+    "zero-dependency",
+    "single-file",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ka1rav6/logx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ka1rav6/logx/issues"
+  },
+  "homepage": "https://github.com/ka1rav6/logx",
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
+}
