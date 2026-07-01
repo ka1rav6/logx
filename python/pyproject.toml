@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-logn"
+version = "1.0.0"
+description = "A zero-dependency single-file logging library."
+readme = "README.md"
+license = "BSD-2-Clause"
+
+authors = [
+    {name = "Kairav Dutta"}
+]
+
+requires-python = ">=3.8"
+
+keywords = [
+    "logging",
+    "logger",
+    "terminal",
+    "debugging",
+    "cli"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Logging",
+    "Intended Audience :: Developers",
+]
+
+[project.urls]
+Homepage = "https://github.com/ka1rav6/logx"
+Repository = "https://github.com/ka1rav6/logx"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["logx*"]

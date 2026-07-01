@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+logx/__init__.py
+logx.egg-info/PKG-INFO
+logx.egg-info/SOURCES.txt
+logx.egg-info/dependency_links.txt
+logx.egg-info/top_level.txt
