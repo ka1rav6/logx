@@ -28,6 +28,12 @@ int main() {
 g++ -std=c++11 main.cpp -o app
 ```
 
+```cpp
+// Optional: log to file
+Logger::setLogFile("/tmp/app.log");   // redirect all output to file
+Logger::setLogFile();                 // close file, go back to terminal
+```
+
 ---
 
 ## C  (`c/logger.h`)
