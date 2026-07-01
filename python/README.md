@@ -83,7 +83,7 @@ LogX is the opposite. One file per language. Same API philosophy everywhere. Dro
 ### Install via pip (Python)
 
 ```bash
-pip install py-logn
+pip install python-logx
 ```
 
 ```python

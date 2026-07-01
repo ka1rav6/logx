@@ -1,3 +1,28 @@
+Metadata-Version: 2.4
+Name: python-logx
+Version: 1.0.0
+Summary: A zero-dependency single-file logging library.
+Author: Kairav Dutta
+License-Expression: BSD-2-Clause
+Project-URL: Homepage, https://github.com/ka1rav6/logx
+Project-URL: Repository, https://github.com/ka1rav6/logx
+Keywords: logging,logger,terminal,debugging,cli
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: System :: Logging
+Classifier: Intended Audience :: Developers
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
 <p align="center">
   <img src="https://img.shields.io/badge/languages-10-blue?style=flat-square" alt="10 languages">
   <img src="https://img.shields.io/badge/dependencies-zero-brightgreen?style=flat-square" alt="Zero deps">
