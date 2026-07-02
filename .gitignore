@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Rust
+target/
+
+# Zig
+.zig-cache/
+zig-out/
+
+# Java
+*.class
+
+# C / C++ / Assembly
+*.o
+*.obj
+*.exe
+
+# Go executables (no go.mod yet, but just in case)
+*.exe
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiled TypeScript (tracked intentionally for npm, so not ignoring)
