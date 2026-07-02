@@ -10,7 +10,7 @@ pub const Level = enum(u8) {
     trace = 0,
     info = 1,
     warn = 2,
-    error = 3,
+    err = 3,
     fatal = 4,
 
     fn name(self: Level) []const u8 {
@@ -18,7 +18,7 @@ pub const Level = enum(u8) {
             .trace => "TRACE",
             .info => "INFO ",
             .warn => "WARN ",
-            .error => "ERROR",
+            .err => "ERROR",
             .fatal => "FATAL",
         };
     }
@@ -28,7 +28,7 @@ pub const Level = enum(u8) {
             .trace => "\x1b[36m",
             .info => "\x1b[32m",
             .warn => "\x1b[33m",
-            .error => "\x1b[31m",
+            .err => "\x1b[31m",
             .fatal => "\x1b[35m",
         };
     }
@@ -62,7 +62,7 @@ fn ensureInit() void {
     defer if (color_env) |s| std.heap.page_allocator.free(s);
 
     use_color = if (color_env) |s| std.mem.eql(u8, s, "1") or std.mem.eql(u8, s, "yes")
-        else std.io.getStdOut().isTty() and std.io.getStdErr().isTty();
+        else std.fs.File.stdout().isTty() and std.fs.File.stderr().isTty();
 
     initialized = true;
 }
@@ -102,15 +102,17 @@ pub fn log(comptime level: Level, comptime msg: []const u8, comptime src: std.bu
     defer mutex.unlock();
 
     if (log_file) |f| {
-        _ = f.write(label) catch {};
-        _ = f.write("\n") catch {};
+        _ = f.writeAll(label) catch {};
+        _ = f.writeAll("\n") catch {};
     } else {
-        const out = if (@intFromEnum(level) >= 3) std.io.getStdErr() else std.io.getStdOut();
-        const writer = out.writer();
+        const out: std.fs.File = if (@intFromEnum(level) >= 3) .stderr() else .stdout();
         if (use_color) {
-            writer.print("{s}{s}\x1b[0m\n", .{ level.color(), label }) catch {};
+            _ = out.writeAll(level.color()) catch {};
+            _ = out.writeAll(label) catch {};
+            _ = out.writeAll("\x1b[0m\n") catch {};
         } else {
-            writer.print("{s}\n", .{label}) catch {};
+            _ = out.writeAll(label) catch {};
+            _ = out.writeAll("\n") catch {};
         }
     }
 
