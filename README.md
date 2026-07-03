@@ -1,11 +1,12 @@
 <p align="center">
   <img src="https://img.shields.io/badge/languages-10-blue?style=flat-square" alt="10 languages">
   <img src="https://img.shields.io/badge/dependencies-zero-brightgreen?style=flat-square" alt="Zero deps">
-  <img src="https://img.shields.io/badge/license-BSD 2--Clause-yellow?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/setup-copy/paste-red?style=flat-square" alt="Copy paste">
+  <img src="https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=flat-square" alt="Platform">
 </p>
 
-<h1 align="center">🐞 LogX</h1>
+<h1 align="center">LogX</h1>
 
 <p align="center">
   <strong>One file. Ten languages. Zero dependencies.</strong><br>
@@ -43,11 +44,20 @@ info("Server started on port %d", 8080);
 
 No installs. No config files. No hunting down 200 transitive deps.
 
-Or just:
+---
 
-```bash
-npm install logx
-```
+## Table of Contents
+
+- [Why LogX?](#why-logx)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [API Reference](#api-reference)
+- [Environment Variables](#environment-variables)
+- [Output Format](#output-format)
+- [Philosophy](#philosophy)
+- [Contributing](#contributing)
+- [Publishing to GitHub](#publishing-to-github)
+- [License](#license)
 
 ---
 
@@ -61,37 +71,45 @@ LogX is the opposite. One file per language. Same API philosophy everywhere. Dro
 
 ### Why not just `print()`?
 
-| Feature | `print()` | LogX |
-|---------|-----------|------|
-| Log levels | ❌ | ✅ TRACE, INFO, WARN, ERROR, FATAL |
-| Timestamps | ❌ | ✅ `[HH:MM:SS.mmm]` |
-| File & line | ❌ | ✅ Automatic |
-| Colored output | ❌ | ✅ Auto TTY detection |
-| File logging | ❌ | ✅ Optional, one call |
-| Thread safe | ❌ | ✅ Mutex-guarded |
-| Level filtering | ❌ | ✅ `LOG_LEVEL=WARN ./app` |
-| Still one file | ✅ | ✅ |
+| Feature            | `print()` | LogX |
+|--------------------|-----------|------|
+| Log levels         | ❌        | ✅ TRACE, INFO, WARN, ERROR, FATAL |
+| Timestamps         | ❌        | ✅ `[HH:MM:SS.mmm]` |
+| File & line        | ❌        | ✅ Automatic |
+| Colored output     | ❌        | ✅ Auto TTY detection |
+| File logging       | ❌        | ✅ Optional, one call |
+| Thread safe        | ❌        | ✅ Mutex-guarded |
+| Level filtering    | ❌        | ✅ `LOG_LEVEL=WARN ./app` |
+| Still one file     | ✅        | ✅ |
 
 ---
 
 ## Quick Start
 
-| Language | File | Include |
-|----------|------|---------|
-| Python | `python/logx.py` | `from logx import info` |
-| JavaScript | `js/logx.js` | `const { info } = require('./logx')` |
-| TypeScript | `ts/logx.ts` | `import { info } from './logx'` |
-| C | `c/logx.h` | `#include "logx.h"` → `LOGX_INFO(...)` |
-| C++ | `cpp/logx.h` | `#include "logx.h"` → `LOGX_INFO << ...` |
-| Rust | `rust/logx.rs` | `#[macro_use] mod logx;` → `logx_info!(...)` |
-| Go | `go/logx.go` | `import "yourmodule/logx"` → `logx.Info(...)` |
-| Java | `java/logx.java` | `import Logx;` → `Logx.info(...)` |
-| Zig | `zig/logx.zig` | `@import("logx.zig")` → `logx.log(.info, ...)` |
-| Assembly | `asm/logx.asm` | `%include "logx.asm"` → `log_info "..."` |
+| Language   | File             | Include                                            |
+|------------|------------------|----------------------------------------------------|
+| Python     | `python/logx/__init__.py` | `from logx import info`                          |
+| JavaScript | `js/logx.js`     | `const { info } = require('./logx')`               |
+| TypeScript | `ts/logx.ts`     | `import { info } from './logx'`                     |
+| C          | `c/logx.h`       | `#include "logx.h"` → `LOGX_INFO(...)`              |
+| C++        | `cpp/logx.h`     | `#include "logx.h"` → `LOGX_INFO << ...`            |
+| Rust       | `rust/logx.rs`   | `#[macro_use] mod logx;` → `logx_info!(...)`        |
+| Go         | `go/logx.go`     | `import "yourmodule/logx"` → `logx.Info(...)`       |
+| Java       | `java/logx.java` | `import Logx;` → `Logx.info(...)`                   |
+| Zig        | `zig/logx.zig`   | `@import("logx.zig")` → `logx.log(.info, ...)`      |
+| Assembly   | `asm/logx.asm`   | `%include "logx.asm"` → `log_info "..."`            |
 
 ---
 
-### Install via pip (Python)
+## Installation
+
+### Copy-paste (any language)
+
+1. Copy the relevant file from this repo into your project.
+2. Include/import it.
+3. Start logging.
+
+### pip (Python)
 
 ```bash
 pip install python-logx
@@ -106,7 +124,7 @@ error("something broke")
 set_log_file("/tmp/app.log")  # redirect to file
 ```
 
-### JavaScript (Node) — [npm package](js/)
+### npm (JavaScript / TypeScript)
 
 ```bash
 npm install logx
@@ -117,12 +135,6 @@ const { trace, info, warn, error, fatal, setLogFile } = require('logx');
 
 info('hello %d', 42);
 error('something broke');
-```
-
-### TypeScript — [npm package](ts/)
-
-```bash
-npm install logx
 ```
 
 ```typescript
@@ -148,7 +160,7 @@ int main() {
 lx_set_log_file("/tmp/app.log");
 ```
 
-```
+```bash
 gcc -std=c11 main.c -o app -lpthread
 ```
 
@@ -169,7 +181,7 @@ Logx::setLogFile("/tmp/app.log");
 Logx::setLogFile();  // back to terminal
 ```
 
-```
+```bash
 g++ -std=c++11 main.cpp -o app
 ```
 
@@ -189,7 +201,8 @@ fn main() {
 logx::set_log_file("/tmp/app.log");
 ```
 
-```
+Add to `Cargo.toml`:
+```toml
 [dependencies]
 libc = "0.2"
 ```
@@ -228,7 +241,7 @@ public class Main {
 Logx.setLogFile("/tmp/app.log");
 ```
 
-```
+```bash
 javac Logx.java Main.java && java Main
 ```
 
@@ -276,24 +289,69 @@ _start:
 %include "logx.asm"
 ```
 
-```
+```bash
 nasm -felf64 main.asm -o main.o && ld main.o -o main
 ```
 
 ---
 
+## API Reference
+
+### Log Levels
+
+| Level | Value | Description |
+|-------|-------|-------------|
+| TRACE | 0     | Finest-grained diagnostic |
+| INFO  | 1     | General operational info |
+| WARN  | 2     | Something unexpected (non-fatal) |
+| ERROR | 3     | Runtime error or failure |
+| FATAL | 4     | Unrecoverable — exits the process |
+
+### Per-language API
+
+| Language   | Log calls                                    | Set log file                              | Clear log file |
+|------------|----------------------------------------------|-------------------------------------------|----------------|
+| Python     | `trace()`, `info()`, `warn()`, `error()`, `fatal()` | `set_log_file(path)`              | `set_log_file(None)` |
+| JavaScript | `trace()`, `info()`, `warn()`, `error()`, `fatal()` | `setLogFile(path)`                | `setLogFile(null)` |
+| TypeScript | `trace()`, `info()`, `warn()`, `error()`, `fatal()` | `setLogFile(path)`                | `setLogFile(null)` |
+| C          | `LOGX_TRACE()`, `LOGX_INFO()`, `LOGX_WARN()`, `LOGX_ERROR()`, `LOGX_FATAL()` | `lx_set_log_file(path)` | `lx_set_log_file(NULL)` |
+| C++        | `LOGX_TRACE <<`, `LOGX_INFO <<`, `LOGX_WARN <<`, `LOGX_ERROR <<`, `LOGX_FATAL <<` | `Logx::setLogFile(path)` | `Logx::setLogFile()` |
+| Rust       | `logx_trace!()`, `logx_info!()`, `logx_warn!()`, `logx_error!()`, `logx_fatal!()` | `set_log_file(path)` | — |
+| Go         | `logx.Trace()`, `logx.Info()`, `logx.Warn()`, `logx.Error()`, `logx.Fatal()` | `logx.SetLogFile(path)` | `logx.SetLogFile("")` |
+| Java       | `Logx.trace()`, `Logx.info()`, `Logx.warn()`, `Logx.error()`, `Logx.fatal()` | `Logx.setLogFile(path)` | `Logx.setLogFile(null)` |
+| Zig        | `logx.log(.trace,)`, `logx.log(.info,)`, `logx.log(.warn,)`, `logx.log(.err,)`, `logx.log(.fatal,)` | `logx.setLogFile(path)` | — |
+| Assembly   | `log_trace`, `log_info`, `log_warn`, `log_error`, `log_fatal` | `%define LOG_FILE_PATH` before include | `call log_close` |
+
+---
+
 ## Environment Variables
 
-| Variable | Values | Default |
-|----------|--------|---------|
-| `LOG_LEVEL` | `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` | `TRACE` |
-| `LOG_COLOR` | `0`, `1`, `yes` | Auto (enabled if both stdout/stderr are TTYs) |
+| Variable    | Values                     | Default                                                        |
+|-------------|----------------------------|----------------------------------------------------------------|
+| `LOG_LEVEL` | `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` | `TRACE`                                          |
+| `LOG_COLOR` | `0`, `1`, `yes`            | Auto (enabled if both stdout and stderr are TTYs)              |
+
+Example:
+
+```bash
+LOG_LEVEL=WARN LOG_COLOR=0 ./myapp
+```
 
 ## Output Format
 
 ```
 [HH:MM:SS.mmm][LEVEL] filename:line -> message
 ```
+
+Example:
+
+```
+[14:23:01.042][INFO ] server.c:42 -> Server started on port 8080
+[14:23:01.043][WARN ] memory.c:17 -> Memory at 74.2%
+[14:23:01.044][ERROR] network.c:89 -> Connection lost
+```
+
+---
 
 ## Philosophy
 
@@ -308,6 +366,114 @@ LogX is not trying to replace OpenTelemetry. It is built for:
 
 > *"If you can write print(), you already know how to use LogX."*
 
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## Publishing to GitHub
+
+### 1. Create the repository on GitHub
+
+```bash
+# Install GitHub CLI if you haven't
+# https://cli.github.com/
+
+# Authenticate
+gh auth login
+
+# Create the repo (from inside the project directory)
+gh repo create logx --public --source=. --remote=origin --push
+```
+
+Or manually:
+
+```bash
+# Create a repo on github.com, then:
+git remote add origin https://github.com/YOUR_USERNAME/logx.git
+git branch -M main
+git push -u origin main
+```
+
+### 2. Publish to package registries
+
+**npm (JavaScript / TypeScript):**
+
+```bash
+# Make sure you're logged in
+npm login
+
+# Publish from js/ directory
+cd js
+npm publish
+
+# Publish from ts/ directory
+cd ../ts
+npm publish
+```
+
+**PyPI (Python):**
+
+```bash
+cd python
+pip install build twine
+python -m build
+python -m twine upload dist/*
+```
+
+**crates.io (Rust):**
+
+```bash
+cd rust
+cargo login
+cargo publish
+```
+
+### 3. Create a release
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+
+# Or via GitHub CLI:
+gh release create v1.0.0 --title "v1.0.0" --notes "Initial release"
+```
+
+### 4. Recommended GitHub repo settings
+
+- **Description**: *"One file. Ten languages. Zero dependencies. — A copy-paste logging library for Python, JS, TS, C, C++, Rust, Go, Java, Zig, and Assembly."*
+- **Topics**: `logging`, `logger`, `zero-dependency`, `single-file`, `python`, `javascript`, `typescript`, `c`, `cpp`, `rust`, `go`, `java`, `zig`, `assembly`
+- **Website**: (optional) Link to your GitHub Pages or personal site
+
+---
+
+## Project Structure
+
+```
+logger/
+├── asm/logx.asm          # x86-64 Assembly (Linux, NASM)
+├── c/logx.h              # C99/C11
+├── cpp/logx.h            # C++11
+├── go/logx.go            # Go
+├── java/logx.java        # Java
+├── js/logx.js            # JavaScript (Node)
+├── python/logx/          # Python
+│   └── __init__.py
+├── rust/logx.rs          # Rust
+├── ts/logx.ts            # TypeScript
+├── zig/logx.zig          # Zig
+├── test/                 # Tests per language
+├── README.md
+├── CONTRIBUTING.md
+├── LICENSE               # BSD 2-Clause
+└── .gitignore
+```
+
+---
+
 ## License
 
-BSD 2-Clause. See `LICENSE`.
+BSD 2-Clause. See [LICENSE](LICENSE).
