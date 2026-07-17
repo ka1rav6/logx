@@ -6,8 +6,8 @@ except that the above copyright notice must be retained in all copies
 of this software, in source or binary form.  That's the only requirement.
 */
 
-#ifndef LOGX_H
-#define LOGX_H
+#ifndef LOGX_LINUX_H
+#define LOGX_LINUX_H
 
 #include <iostream>
 #include <fstream>
@@ -19,6 +19,7 @@ of this software, in source or binary form.  That's the only requirement.
 #include <iomanip>
 #include <cstdlib>
 #include <cstring>
+#include <unistd.h>
 
 enum class LogLevel {
     TRACE = 0,
@@ -45,7 +46,14 @@ public:
         return level;
     }
 
-    static bool colored();
+    static bool colored() {
+        static bool c = []{
+            const char* env = std::getenv("LOG_COLOR");
+            if (env) return std::string(env) == "1" || std::string(env) == "yes";
+            return isatty(fileno(stdout)) && isatty(fileno(stderr));
+        }();
+        return c;
+    }
 
     static void setLogFile(const std::string& path) {
         logStream().open(path, std::ios::app);
@@ -112,9 +120,6 @@ public:
 
         void stripPath(const char* path) {
             const char* slash = strrchr(path, '/');
-#ifdef _WIN32
-            if (!slash) slash = strrchr(path, '\\');
-#endif
             m_file = slash ? slash + 1 : path;
         }
 
@@ -140,7 +145,17 @@ public:
             return "\033[0m";
         }
 
-        static std::string timestamp();
+        static std::string timestamp() {
+            using namespace std::chrono;
+            auto now = system_clock::now();
+            auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;
+            auto t = system_clock::to_time_t(now);
+            std::tm tm;
+            localtime_r(&t, &tm);
+            std::ostringstream ss;
+            ss << std::put_time(&tm, "%H:%M:%S") << '.' << std::setfill('0') << std::setw(3) << ms.count();
+            return ss.str();
+        }
     };
 
 private:
@@ -157,11 +172,5 @@ private:
 #define LOGX_WARN  Logx::LogStream(LogLevel::WARN,  __FILE__, __LINE__)
 #define LOGX_ERROR Logx::LogStream(LogLevel::ERROR, __FILE__, __LINE__)
 #define LOGX_FATAL Logx::LogStream(LogLevel::FATAL, __FILE__, __LINE__)
-
-#if defined(__linux__) || defined(__APPLE__)
-#include "logx_linux.cpp"
-#elif defined(_WIN32)
-#include "logx_windows.cpp"
-#endif
 
 #endif

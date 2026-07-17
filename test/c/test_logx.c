@@ -1,4 +1,4 @@
-#include "../../c/logx.h"
+#include "../../c/logx_linux.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
