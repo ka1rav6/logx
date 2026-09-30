@@ -1,49 +1,117 @@
-#include "../../cpp/logx_linux.h"
+// Tests for cpp/logx.h. Build from the project root:
+//   c++ -std=c++11 -Wall -Wextra -I cpp test/cpp/test_logx.cpp -o /tmp/test_logx_cpp
+
+// Reproduce what <windows.h> does to the global namespace, so a collision shows
+// up here rather than in somebody's build.
+#define ERROR 0
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+#include "logx.h"
+
 #include <cstdio>
-#include <cstring>
-#include <cstdlib>
-#include <unistd.h>
+#include <fstream>
+#include <iomanip>
+#include <string>
+#include <vector>
 
 static int failed = 0;
 
-static void check(bool cond, const char *msg) {
-    if (!cond) {
-        fprintf(stderr, "FAIL: %s\n", msg);
-        failed = 1;
+static void check(bool cond, const char* what) {
+    if (cond) {
+        std::printf("PASS: %s\n", what);
     } else {
-        fprintf(stdout, "PASS: %s\n", msg);
+        std::printf("FAIL: %s\n", what);
+        failed = 1;
     }
 }
 
-static void test_basic_output() {
-    char tpl[] = "/tmp/logx_cpp_XXXXXX";
-    int fd = mkstemp(tpl);
-    close(fd);
+static std::vector<std::string> readLines(const std::string& path) {
+    std::vector<std::string> lines;
+    std::ifstream in(path.c_str());
+    std::string line;
+    while (std::getline(in, line)) lines.push_back(line);
+    return lines;
+}
 
-    Logx::setLogFile(tpl);
-    LOGX_INFO << "info msg";
-    LOGX_WARN << "warn msg";
-    LOGX_ERROR << "error msg";
+static bool contains(const std::string& haystack, const std::string& needle) {
+    return haystack.find(needle) != std::string::npos;
+}
+
+// "[HH:MM:SS.mmm][" -- the prefix every record shares.
+static bool hasTimestamp(const std::string& line) {
+    return line.size() > 14 && line[0] == '[' && line[3] == ':' && line[6] == ':'
+        && line[9] == '.' && line[13] == ']' && line[14] == '[';
+}
+
+static void testStreamAndPrintf(const std::string& path) {
+    check(logx::setLogFile(path), "setLogFile succeeds");
+
     LOGX_TRACE << "trace msg";
-    Logx::setLogFile();
+    LOGX_INFO << "port " << 8080;
+    LOGX_WARN << "hex " << std::hex << 255;
+    LOGX_ERROR << "lost";
+    LOGX_INFOF("printf port %d", 8080);
+    LOGX_WARNF("memory at %.1f%%", 74.2);
 
-    FILE *f = fopen(tpl, "r");
-    char buf[4][512];
-    int n = 0;
-    while (n < 4 && fgets(buf[n], sizeof buf[n], f)) n++;
-    fclose(f);
-    std::remove(tpl);
+    logx::setLogFile();
+    std::vector<std::string> lines = readLines(path);
+    std::remove(path.c_str());
 
-    check(n == 4, "wrote 4 log lines");
-    check(strstr(buf[0], "info msg")  && strstr(buf[0], "INFO "), "INFO line");
-    check(strstr(buf[1], "warn msg")  && strstr(buf[1], "WARN "), "WARN line");
-    check(strstr(buf[2], "error msg") && strstr(buf[2], "ERROR"), "ERROR line");
-    check(strstr(buf[3], "trace msg") && strstr(buf[3], "TRACE"), "TRACE line");
+    check(lines.size() == 6, "wrote one line per call");
+    if (lines.size() < 6) return;
+
+    check(hasTimestamp(lines[0]), "line starts with [HH:MM:SS.mmm][");
+    check(contains(lines[0], "[TRACE]"), "TRACE label");
+    check(contains(lines[1], "[INFO ]"), "INFO label is padded to 5");
+    check(contains(lines[2], "[WARN ]"), "WARN label is padded to 5");
+    check(contains(lines[3], "[ERROR]"), "ERROR label survives the ERROR macro");
+
+    check(contains(lines[1], "port 8080"), "stream operator<<");
+    check(contains(lines[2], "hex ff"), "std::hex manipulator");
+    check(contains(lines[4], "printf port 8080"), "LOGX_INFOF applies arguments");
+    check(contains(lines[5], "memory at 74.2%"), "LOGX_WARNF handles %% and floats");
+
+    check(contains(lines[0], "test_logx.cpp:"), "reports the calling file");
+    check(!contains(lines[0], "/"), "path is stripped to a base name");
+    check(!contains(lines[0], "\033["), "no color escapes in a file");
+}
+
+static void testLevelFilter(const std::string& path) {
+    logx::setLogFile(path);
+    logx::setLevel(logx::Level::Warn);
+    check(logx::getLevel() == logx::Level::Warn, "getLevel reflects setLevel");
+    check(!logx::enabled(logx::Level::Info), "enabled() is false below the threshold");
+    check(logx::enabled(logx::Level::Error), "enabled() is true at or above it");
+
+    LOGX_TRACE << "hidden";
+    LOGX_INFOF("hidden");
+    LOGX_WARN << "shown";
+    LOGX_ERRORF("shown");
+
+    logx::setLevel(logx::Level::Off);
+    LOGX_ERROR << "silenced by Off";
+
+    logx::setLevel(logx::Level::Trace);
+    logx::setLogFile();
+    std::vector<std::string> lines = readLines(path);
+    std::remove(path.c_str());
+
+    check(lines.size() == 2, "only Warn and above passed the filter");
+}
+
+static void testBadPath() {
+    check(!logx::setLogFile("/nonexistent-dir-xyz/app.log"),
+          "setLogFile reports an unwritable path");
+    logx::setLogFile();
 }
 
 int main() {
-    test_basic_output();
+    const std::string path = "/tmp/logx_cpp_test.log";
 
-    check(!failed, "all C++ tests passed");
-    return failed ? 1 : 0;
+    testStreamAndPrintf(path);
+    testLevelFilter(path);
+    testBadPath();
+
+    std::printf("%s\n", failed ? "C++ tests FAILED" : "all C++ tests passed");
+    return failed;
 }

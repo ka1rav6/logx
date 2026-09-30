@@ -1,7 +1,7 @@
 {
   "name": "logx",
-  "version": "1.0.0",
-  "description": "Single-file logger for TypeScript — zero dependencies, copy-paste ready",
+  "version": "1.1.0",
+  "description": "Single-file logger for TypeScript \u2014 zero dependencies, copy-paste ready",
   "main": "logx.js",
   "types": "logx.d.ts",
   "license": "BSD-2-Clause",

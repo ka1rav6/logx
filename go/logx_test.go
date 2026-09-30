@@ -1,91 +1,160 @@
 package logx
 
 import (
-	"bytes"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
 
-func captureOutput(fn func()) (string, string) {
-	stdoutR, stdoutW, _ := os.Pipe()
-	stderrR, stderrW, _ := os.Pipe()
-	oldStdout := os.Stdout
-	oldStderr := os.Stderr
-	os.Stdout = stdoutW
-	os.Stderr = stderrW
+// [HH:MM:SS.mmm][LEVEL] file:line -> message
+var record = regexp.MustCompile(`^\[\d{2}:\d{2}:\d{2}\.\d{3}\]\[(\w+ ?)\] ([^/\\:]+):(\d+) -> (.*)$`)
 
+// capture runs fn with output going to a temp file and returns the lines.
+func capture(t *testing.T, fn func()) []string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "logx.log")
+	if err := SetLogFile(path); err != nil {
+		t.Fatalf("SetLogFile: %v", err)
+	}
 	fn()
-
-	stdoutW.Close()
-	stderrW.Close()
-	os.Stdout = oldStdout
-	os.Stderr = oldStderr
-
-	var stdoutBuf, stderrBuf bytes.Buffer
-	stdoutBuf.ReadFrom(stdoutR)
-	stderrBuf.ReadFrom(stderrR)
-	return stdoutBuf.String(), stderrBuf.String()
+	if err := SetLogFile(""); err != nil {
+		t.Fatalf("SetLogFile(\"\"): %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	return strings.Split(strings.TrimRight(string(data), "\n"), "\n")
 }
 
-func TestBasicOutput(t *testing.T) {
-	stdout, stderr := captureOutput(func() {
+func TestFormatAndArgs(t *testing.T) {
+	lines := capture(t, func() {
 		Trace("trace msg")
-		Info("info msg")
-		Warn("warn msg")
-		Error("error msg")
+		Info("port %d", 8080)
+		Warn("memory at %.1f%%", 74.2)
+		Error("lost: %s", "ECONNRESET")
+		Info("literal 100% done")
 	})
 
-	if !strings.Contains(stdout, "TRACE") || !strings.Contains(stdout, "trace msg") {
-		t.Error("TRACE not found in stdout")
+	if len(lines) != 5 {
+		t.Fatalf("got %d lines, want 5: %q", len(lines), lines)
 	}
-	if !strings.Contains(stdout, "INFO ") || !strings.Contains(stdout, "info msg") {
-		t.Error("INFO not found in stdout")
+
+	want := []struct {
+		level string
+		msg   string
+	}{
+		{"TRACE", "trace msg"},
+		{"INFO ", "port 8080"},
+		{"WARN ", "memory at 74.2%"},
+		{"ERROR", "lost: ECONNRESET"},
+		{"INFO ", "literal 100% done"},
 	}
-	if !strings.Contains(stdout, "WARN ") || !strings.Contains(stdout, "warn msg") {
-		t.Error("WARN not found in stdout")
+
+	for i, line := range lines {
+		m := record.FindStringSubmatch(line)
+		if m == nil {
+			t.Errorf("line %d does not match the documented format: %q", i, line)
+			continue
+		}
+		if m[1] != want[i].level {
+			t.Errorf("line %d level = %q, want %q", i, m[1], want[i].level)
+		}
+		if m[4] != want[i].msg {
+			t.Errorf("line %d message = %q, want %q", i, m[4], want[i].msg)
+		}
+		if m[2] != "logx_test.go" {
+			t.Errorf("line %d file = %q, want logx_test.go", i, m[2])
+		}
 	}
-	if !strings.Contains(stderr, "ERROR") || !strings.Contains(stderr, "error msg") {
-		t.Error("ERROR not found in stderr")
+
+	if strings.Contains(lines[0], "\033[") {
+		t.Error("color escapes leaked into a file")
 	}
 }
 
-func TestFileLogging(t *testing.T) {
-	f, _ := os.CreateTemp("", "logx_test_*.log")
-	path := f.Name()
-	f.Close()
-	defer os.Remove(path)
+// Log's skip parameter should let a wrapper report its own caller.
+func TestSkipReportsTheWrappersCaller(t *testing.T) {
+	helper := func(msg string) { Log(INFO, 1, msg) }
 
-	SetLogFile(path)
-	Info("file test")
-	SetLogFile("")
+	lines := capture(t, func() { helper("wrapped") })
 
-	data, _ := os.ReadFile(path)
-	content := string(data)
-	if !strings.Contains(content, "file test") {
-		t.Error("file log missing message")
+	m := record.FindStringSubmatch(lines[0])
+	if m == nil {
+		t.Fatalf("unparsed: %q", lines[0])
 	}
-	if !strings.Contains(content, "INFO ") {
-		t.Error("file log missing level")
+	if m[2] != "logx_test.go" {
+		t.Errorf("file = %q, want logx_test.go", m[2])
 	}
 }
 
-func TestLevelFiltering(t *testing.T) {
-	saved := minLevel
-	minLevel = ERROR
-	defer func() { minLevel = saved }()
+func TestLevelFilter(t *testing.T) {
+	defer SetLevel(TRACE)
 
-	stdout, stderr := captureOutput(func() {
-		Trace("should not appear")
-		Info("should not appear")
-		Warn("should not appear")
-		Error("should appear")
+	lines := capture(t, func() {
+		SetLevel(WARN)
+		Trace("hidden")
+		Info("hidden")
+		Warn("shown")
+		Error("shown")
+		SetLevel(OFF)
+		Error("silenced by OFF")
+		SetLevel(TRACE)
 	})
 
-	if stdout != "" {
-		t.Error("expected no stdout output with minLevel=ERROR")
+	if len(lines) != 2 {
+		t.Errorf("got %d lines, want 2: %q", len(lines), lines)
 	}
-	if !strings.Contains(stderr, "should appear") {
-		t.Error("ERROR message should appear in stderr")
+	if GetLevel() != TRACE {
+		t.Errorf("GetLevel() = %v, want TRACE", GetLevel())
+	}
+}
+
+func TestEnabled(t *testing.T) {
+	defer SetLevel(TRACE)
+
+	SetLevel(WARN)
+	if Enabled(INFO) {
+		t.Error("Enabled(INFO) should be false at WARN")
+	}
+	if !Enabled(ERROR) {
+		t.Error("Enabled(ERROR) should be true at WARN")
+	}
+
+	SetLevel(OFF)
+	if Enabled(FATAL) {
+		t.Error("Enabled should be false for every level at OFF")
+	}
+}
+
+func TestParseLevel(t *testing.T) {
+	cases := map[string]Level{
+		"trace": TRACE, "TRACE": TRACE, "debug": TRACE, "0": TRACE,
+		"info": INFO, "warning": WARN, "2": WARN,
+		"err": ERROR, "3": ERROR,
+		"fatal": FATAL, "off": OFF, "silent": OFF, "5": OFF,
+		"  warn  ": WARN,
+	}
+	for input, want := range cases {
+		if got := ParseLevel(input, TRACE); got != want {
+			t.Errorf("ParseLevel(%q) = %v, want %v", input, got, want)
+		}
+	}
+	if got := ParseLevel("junk", INFO); got != INFO {
+		t.Errorf("ParseLevel(%q) = %v, want the fallback INFO", "junk", got)
+	}
+}
+
+func TestSetLogFileRejectsABadPath(t *testing.T) {
+	if err := SetLogFile("/nonexistent-dir-xyz/app.log"); err == nil {
+		t.Error("SetLogFile should report an unwritable path")
+	}
+}
+
+func TestLevelString(t *testing.T) {
+	if TRACE.String() != "TRACE" || WARN.String() != "WARN" || OFF.String() != "OFF" {
+		t.Error("Level.String is wrong")
 	}
 }

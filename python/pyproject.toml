@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-logx"
-version = "1.0.0"
+version = "1.1.0"
 description = "A zero-dependency single-file logging library."
 readme = "README.md"
 license = "BSD-2-Clause"
@@ -41,6 +41,5 @@ classifiers = [
 Homepage = "https://github.com/ka1rav6/logx"
 Repository = "https://github.com/ka1rav6/logx"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["logx*"]
+[tool.setuptools]
+py-modules = ["logx"]

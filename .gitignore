@@ -7,6 +7,8 @@ build/
 
 # Rust
 target/
+# A library crate's lock file is not meaningful to its users.
+Cargo.lock
 
 # Zig
 .zig-cache/
@@ -20,11 +22,19 @@ zig-out/
 *.obj
 *.exe
 
-# Go executables (no go.mod yet, but just in case)
-*.exe
+# Go
+*.test
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Compiled TypeScript (tracked intentionally for npm, so not ignoring)
+# Compiled TypeScript is tracked on purpose: ts/logx.js and ts/logx.d.ts are
+# what the npm package ships. Regenerate with `cd ts && npx tsc`.
+
+# Test runner output
+build/
+
+# Node
+node_modules/
+package-lock.json

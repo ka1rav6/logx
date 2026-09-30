@@ -1,293 +1,108 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/languages-10-blue?style=flat-square" alt="10 languages">
-  <img src="https://img.shields.io/badge/dependencies-zero-brightgreen?style=flat-square" alt="Zero deps">
-  <img src="https://img.shields.io/badge/license-BSD 2--Clause-yellow?style=flat-square" alt="License">
-  <img src="https://img.shields.io/badge/setup-copy/paste-red?style=flat-square" alt="Copy paste">
-</p>
+# LogX for Python
 
-<h1 align="center">🐞 LogX</h1>
+**One file. Zero dependencies. Copy. Paste. Log.**
 
-<p align="center">
-  <strong>One file. Ten languages. Zero dependencies.</strong><br>
-  <em>Copy. Paste. Log.</em>
-</p>
+`logx` is a single-file logger: levels, timestamps, the real call site, colors,
+and optional file output, in about 250 lines of pure standard library.
 
----
-
-## What if logging were this easy?
-
-```python
-from logx import info, warn, error
-
-info("Server started on port %d", 8080)
-warn("Memory at %.1f%%", 74.2)
-error("Connection lost")
-```
-
-```c
-LOGX_INFO("Server started on port %d", 8080);
-LOGX_WARN("Memory at %.1f%%", 74.2);
-LOGX_ERROR("Connection lost");
-```
-
-```rust
-logx_info!("Server started on port {}", 8080);
-logx_warn!("Memory at {:.1}%", 74.2);
-logx_error!("Connection lost");
-```
-
-That's it. No installs. No config files. No `npm install` hunting down 200 transitive deps.
-
----
-
-## Why LogX?
-
-Logging should be as easy as `print()`. But `print()` doesn't give you levels, timestamps, colors, or file output.
-
-Most logging libraries give you all that — and also give you a headache. Setup, configuration, dependencies, framework lock-in...
-
-LogX is the opposite. One file per language. Same API philosophy everywhere. Drop it in, include it, done.
-
-### Why not just `print()`?
-
-| Feature | `print()` | LogX |
-|---------|-----------|------|
-| Log levels | ❌ | ✅ TRACE, INFO, WARN, ERROR, FATAL |
-| Timestamps | ❌ | ✅ `[HH:MM:SS.mmm]` |
-| File & line | ❌ | ✅ Automatic |
-| Colored output | ❌ | ✅ Auto TTY detection |
-| File logging | ❌ | ✅ Optional, one call |
-| Thread safe | ❌ | ✅ Mutex-guarded |
-| Level filtering | ❌ | ✅ `LOG_LEVEL=WARN ./app` |
-| Still one file | ✅ | ✅ |
-
----
-
-## Quick Start
-
-| Language | File | Include |
-|----------|------|---------|
-| Python | `python/logx.py` | `from logx import info` |
-| JavaScript | `js/logx.js` | `const { info } = require('./logx')` |
-| TypeScript | `ts/logx.ts` | `import { info } from './logx'` |
-| C | `c/logx.h` | `#include "logx.h"` → `LOGX_INFO(...)` |
-| C++ | `cpp/logx.h` | `#include "logx.h"` → `LOGX_INFO << ...` |
-| Rust | `rust/logx.rs` | `#[macro_use] mod logx;` → `logx_info!(...)` |
-| Go | `go/logx.go` | `import "yourmodule/logx"` → `logx.Info(...)` |
-| Java | `java/logx.java` | `import Logx;` → `Logx.info(...)` |
-| Zig | `zig/logx.zig` | `@import("logx.zig")` → `logx.log(.info, ...)` |
-| Assembly | `asm/logx.asm` | `%include "logx.asm"` → `log_info "..."` |
-
----
-
-### Install via pip (Python)
+It is one language of [LogX](https://github.com/ka1rav6/logx), which ships the
+same logger for Python, JavaScript, TypeScript, C, C++, Rust, Go, Java, Zig and
+x86-64 assembly.
 
 ```bash
 pip install python-logx
 ```
 
+Or just copy `logx.py` into your project. That works exactly the same.
+
+## Use it
+
 ```python
-from logx import trace, info, warn, error, fatal, set_log_file
+from logx import trace, info, warn, error, fatal
 
-info("hello %d", 42)
-error("something broke")
-
-set_log_file("/tmp/app.log")  # redirect to file
-```
-
-### JavaScript (Node)
-
-```javascript
-const { trace, info, warn, error, fatal, setLogFile } = require('./logx');
-
-info('hello %d', 42);
-error('something broke');
-```
-
-### TypeScript
-
-```typescript
-import { trace, info, warn, error, fatal, setLogFile } from './logx';
-
-info('hello %d', 42);
-error('something broke');
-```
-
-### C
-
-```c
-#include "logx.h"
-
-int main() {
-    LOGX_INFO("hello %d", 42);
-    LOGX_ERROR("something broke");
-}
-```
-
-```c
-// Optional: log to file
-lx_set_log_file("/tmp/app.log");
+info("listening on port %d", 8080)
+warn("memory at %.1f%%", 74.2)
+error("connection lost: %s", reason)
 ```
 
 ```
-gcc -std=c11 main.c -o app -lpthread
+[14:23:01.042][INFO ] server.py:12 -> listening on port 8080
+[14:23:01.043][WARN ] server.py:13 -> memory at 74.2%
+[14:23:01.044][ERROR] server.py:14 -> connection lost: ECONNRESET
 ```
 
-### C++
+`ERROR` and `FATAL` go to stderr, everything else to stdout, so piping stdout
+still gives you your program's real output. `fatal()` logs and then exits with
+status 1.
 
-```cpp
-#include "logx.h"
+Arguments use `%`-formatting and are applied only when the level passes the
+filter, so a filtered-out call costs almost nothing. A message with no arguments
+is never formatted, so `info("100% done")` needs no escaping.
 
-int main() {
-    LOGX_INFO << "hello " << 42;
-    LOGX_ERROR << "something broke";
-}
+## Configure it
+
+```python
+import logx
+
+logx.set_level("WARN")              # or logx.set_level(logx.WARN)
+logx.set_log_file("/tmp/app.log")   # append to a file
+logx.set_log_file(None)             # back to the terminal
+logx.set_color(False)               # override the TTY detection
 ```
 
-```cpp
-// Optional: log to file
-Logx::setLogFile("/tmp/app.log");
-Logx::setLogFile();  // back to terminal
+| Function | Purpose |
+|---|---|
+| `trace() info() warn() error() fatal()` | Log at a level |
+| `log(level, msg, *args, depth=2)` | Log at a level chosen at runtime |
+| `set_level(level)` / `get_level()` | Read or change the threshold |
+| `set_log_file(path)` | Append to a file, or `None` for the terminal |
+| `set_color(enabled)` | Force color on or off |
+| `flush()` | Flush pending output |
+
+Levels are `logx.TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL`, and `OFF` to silence
+everything.
+
+### Wrapping it in your own helper
+
+`depth` controls which frame gets reported, so your wrapper can point at *its*
+caller rather than at itself:
+
+```python
+def log_request(request):
+    logx.log(logx.INFO, "%s %s", request.method, request.path, depth=3)
 ```
 
-```
-g++ -std=c++11 main.cpp -o app
-```
+## Environment
 
-### Rust
-
-```rust
-#[macro_use] mod logx;
-
-fn main() {
-    logx_info!("hello {}", 42);
-    logx_error!("something broke");
-}
-```
-
-```rust
-// Optional: log to file
-logx::set_log_file("/tmp/app.log");
-```
-
-```
-[dependencies]
-libc = "0.2"
-```
-
-### Go
-
-```go
-package main
-
-import "yourmodule/logx"
-
-func main() {
-    logx.Info("hello %d", 42)
-    logx.Error("something broke")
-}
-```
-
-```go
-// Optional: log to file
-logx.SetLogFile("/tmp/app.log")
-```
-
-### Java
-
-```java
-public class Main {
-    public static void main(String[] args) {
-        Logx.info("hello %d", 42);
-        Logx.error("something broke");
-    }
-}
-```
-
-```java
-// Optional: log to file
-Logx.setLogFile("/tmp/app.log");
-```
-
-```
-javac Logx.java Main.java && java Main
-```
-
-### Zig
-
-```zig
-const logx = @import("logx.zig");
-
-pub fn main() void {
-    logx.log(.info, "hello 42", @src());
-    logx.log(.error, "something broke", @src());
-}
-```
-
-```zig
-// Optional: log to file
-try logx.setLogFile("/tmp/app.log");
-```
-
-### x86-64 Assembly (Linux, NASM)
-
-```asm
-%include "logx.asm"
-
-section .data
-log_str(msg_hello, "hello 42")
-log_str(msg_error, "something broke")
-
-section .text
-global _start
-_start:
-    call log_init
-    log_info msg_hello
-    log_error msg_error
-    call log_close
-
-    mov rax, 60
-    xor rdi, rdi
-    syscall
-```
-
-```asm
-; Optional: log to file (define before including)
-%define LOG_FILE_PATH "/tmp/app.log"
-%include "logx.asm"
-```
-
-```
-nasm -felf64 main.asm -o main.o && ld main.o -o main
-```
-
----
-
-## Environment Variables
+Nothing to configure in code — these work out of the box, and are shared with
+every other LogX language.
 
 | Variable | Values | Default |
-|----------|--------|---------|
-| `LOG_LEVEL` | `TRACE`, `INFO`, `WARN`, `ERROR`, `FATAL` | `TRACE` |
-| `LOG_COLOR` | `0`, `1`, `yes` | Auto (enabled if both stdout/stderr are TTYs) |
+|---|---|---|
+| `LOG_LEVEL` | `TRACE` `INFO` `WARN` `ERROR` `FATAL` `OFF`, or `0`–`5` | `TRACE` |
+| `LOG_COLOR` | `1`/`true`/`yes`/`on`, or `0`/`false`/`no`/`off` | auto-detect |
+| `NO_COLOR` | set to anything to disable color | unset |
+| `LOG_FILE` | a path to append to instead of the terminal | unset |
+| `LOG_STREAM` | `split`, `stdout`, `stderr` | `split` |
 
-## Output Format
-
+```bash
+LOG_LEVEL=WARN python app.py                    # quieter
+LOG_FILE=/tmp/app.log python app.py             # to a file, no code change
+LOG_STREAM=stderr python app.py > results.txt   # keep stdout for real output
 ```
-[HH:MM:SS.mmm][LEVEL] filename:line -> message
-```
 
-## Philosophy
+Level names are case-insensitive, and `DEBUG`, `ALL`, `WARNING`, `ERR`,
+`CRITICAL`, `NONE` and `SILENT` are accepted as aliases. Color is never written
+into a log file, whatever the settings say.
 
-LogX is not trying to replace OpenTelemetry. It is built for:
+## What it is not
 
-- Prototypes & hackathons
-- CLI tools & scripts
-- Game jams
-- Students learning a new language
-- Small-to-medium projects
-- Anyone who just wants to log without ceremony
+`logx` is not a replacement for `logging` or OpenTelemetry. There are no
+handlers, no hierarchies, no structured output, no rotation. It is for
+prototypes, CLI tools, scripts, game jams, and learning — the cases where you
+want a log line without ceremony.
 
-> *"If you can write print(), you already know how to use LogX."*
+Requires Python 3.8 or newer. Works on Linux, macOS and Windows.
 
 ## License
 
