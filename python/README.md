@@ -9,6 +9,9 @@ It is one language of [LogX](https://github.com/ka1rav6/logx), which ships the
 same logger for Python, JavaScript, TypeScript, C, C++, Rust, Go, Java, Zig and
 x86-64 assembly.
 
+Full documentation:
+[docs/python.md](https://github.com/ka1rav6/logx/blob/main/docs/python.md).
+
 ```bash
 pip install python-logx
 ```

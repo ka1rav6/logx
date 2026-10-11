@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 
 static int failed = 0;
 
@@ -99,17 +100,34 @@ static void test_level_filter(const char *path) {
     }
 }
 
+/* A FATAL that the level filter hides must still end the process with status 1.
+ * Checked in a child process, since a pass means the child exits. */
+static void test_fatal_exits_even_when_filtered(void) {
+    int status = system("LOG_LEVEL=OFF \"$LOGX_TEST_SELF\" --fatal >/dev/null 2>&1");
+    check(status != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 1,
+          "a filtered-out FATAL still exits with status 1");
+}
+
 static void test_bad_path(void) {
     check(lx_set_log_file("/nonexistent-dir-xyz/app.log") == -1,
           "lx_set_log_file reports an unwritable path");
 }
 
-int main(void) {
+int main(int argc, char **argv) {
     char path[256];
+
+    /* Re-executed by test_fatal_exits_even_when_filtered. */
+    if (argc > 1 && strcmp(argv[1], "--fatal") == 0) {
+        LOGX_FATAL("this one is filtered out but must still exit 1");
+        return 0;   /* unreachable */
+    }
+
+    setenv("LOGX_TEST_SELF", argv[0], 1);
     snprintf(path, sizeof path, "/tmp/logx_c_test_%ld.log", (long)getpid());
 
     test_format_and_levels(path);
     test_level_filter(path);
+    test_fatal_exits_even_when_filtered();
     test_bad_path();
 
     printf("%s\n", failed ? "C tests FAILED" : "all C tests passed");

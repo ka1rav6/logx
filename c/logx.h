@@ -421,7 +421,12 @@ LX__FN void lx_vlog(int level, const char *file, int line, const char *fmt, va_l
     lx__init_locked();
     n = (level < st->level || st->level >= LX_OFF);
     LX__UNLOCK(lx__mu());
-    if (n) return;
+    if (n) {
+        /* A filtered-out FATAL still has to end the process: a log setting must
+         * not be able to turn a process-ending condition into a no-op. */
+        if (level == LX_FATAL) exit(1);
+        return;
+    }
 
     n = vsnprintf(msg, sizeof msg, fmt ? fmt : "", ap);
     if (n < 0)
